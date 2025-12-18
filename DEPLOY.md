@@ -274,3 +274,10 @@ docker compose down
 - **Port conflict?** Change `OMNIBOARD_HOST_PORT`, `EXTRACTOR_HOST_PORT`, or MinIO mappings in `docker-compose.yml`.
 - **S3 SDKs:** Use endpoint `http://localhost:9000` with MinIO credentials.
 - **AltarExtractor can't connect?** Make sure to use `mongo` as the host (Docker service name), not `localhost`.
+
+---
+
+## Related
+
+- [AltarExtractor](https://github.com/DreamRepo/AltarExtractor) — Browse and filter Sacred experiments in a web UI
+- [AltarSender](https://github.com/DreamRepo/AltarSender) — GUI to send experiments to Sacred and MinIO
