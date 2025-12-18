@@ -1,0 +1,65 @@
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - "27017:27017"
+    volumes:
+      - C:/Users/WilliamGaultier/Desktop/datadatadata/mongo_data:/data/db
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - C:/Users/WilliamGaultier/Desktop/datadatadata/minio_data:/data # Change this path to your desired host directory
+    profiles:
+      - minio
+
+  omniboard:
+    image: vivekratnavel/omniboard:latest
+    container_name: omniboard
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "${OMNIBOARD_HOST_PORT}:9000"
+    command: [
+      "--mu",
+      "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/?authSource=admin&authMechanism=SCRAM-SHA-1",
+      "${MONGO_DB}"
+    ]
+
+  extractor:
+    build:
+      context: ../AltarExtractor
+      dockerfile: Dockerfile
+    container_name: altar-extractor
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "${EXTRACTOR_HOST_PORT:-8050}:8050"
+    environment:
+      - PORT=8050
+      - SACRED_DB_NAME=${MONGO_DB}
+    profiles:
+      - extractor
+
+volumes:
+  mongo_data:
+  minio_data:
+
