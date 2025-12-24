@@ -6,8 +6,8 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 
 | Service | Description | Port |
 |---------|-------------|------|
-| **MongoDB** | Stores experiment metadata | 27017 |
-| **Omniboard** | Web dashboard for Sacred experiments | 9004 |
+| **MongoDB** | Stores experiment metadata | 27077 |
+| **Omniboard** | Web dashboard for Sacred experiments | 9030 |
 | **MinIO** | S3-compatible object storage (optional) | 9000, 9001 |
 | **AltarExtractor** | Browse and filter experiments (optional) | 8050 |
 
@@ -15,12 +15,10 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 
 1. **Create `.env` file** with your credentials:
    ```dotenv
-   MONGO_ROOT_USER=admin
-   MONGO_ROOT_PASSWORD=your_secure_password
    MONGO_DB=sacred
    MINIO_ROOT_USER=minio_admin
    MINIO_ROOT_PASSWORD=your_minio_password
-   OMNIBOARD_HOST_PORT=9004
+   OMNIBOARD_HOST_PORT=9030
    EXTRACTOR_HOST_PORT=8050
    ```
 
@@ -40,7 +38,7 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
    ```
 
 3. **Access the services:**
-   - Omniboard: http://localhost:9004
+   - Omniboard: http://localhost:9030
    - AltarExtractor: http://localhost:8050
    - MinIO Console: http://localhost:9001
 
@@ -48,6 +46,35 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 
 - [DEPLOY.md](DEPLOY.md) — Full deployment guide with detailed configuration
 - [MANAGE_USERS.md](MANAGE_USERS.md) — MongoDB and MinIO user management
+
+
+## For developers: 
+
+### Purpose: add credentials to MongoDB
+Update the .env file: 
+
+   ```dotenv
+   MONGO_ROOT_USER=admin
+   MONGO_ROOT_PASSWORD=your_secure_password
+   ```
+
+and the "environment" section of docker-compose.yml file:
+
+ ```docker
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - "27077:27017"
+    volumes:
+      - PATH/TO/DATA/mongo_data:/data/db
+
+ ```
 
 ## Requirements
 
