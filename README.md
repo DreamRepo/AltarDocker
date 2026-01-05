@@ -6,7 +6,7 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 
 | Service | Description | Port |
 |---------|-------------|------|
-| **MongoDB** | Stores experiment metadata | 27077 |
+| **MongoDB** | Stores experiment metadata | 27017 |
 | **Omniboard** | Web dashboard for Sacred experiments | 9030 |
 | **MinIO** | S3-compatible object storage (optional) | 9000, 9001 |
 | **AltarExtractor** | Browse and filter experiments (optional) | 8050 |
@@ -16,10 +16,13 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 1. **Create `.env` file** with your credentials:
    ```dotenv
    MONGO_DB=sacred
+
    MINIO_ROOT_USER=minio_admin
    MINIO_ROOT_PASSWORD=your_minio_password
+
    OMNIBOARD_HOST_PORT=9030
    EXTRACTOR_HOST_PORT=8050
+   MONGO_PORT=27017 # Careful here if you already have MongoDB installed on your computer, change this port to eg. 27077 !
    ```
 
 2. **Start the stack:**
@@ -70,7 +73,7 @@ and the "environment" section of docker-compose.yml file:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_DB}
     ports:
-      - "27077:27017"
+      - "${MONGO_PORT}:27017"
     volumes:
       - PATH/TO/DATA/mongo_data:/data/db
 

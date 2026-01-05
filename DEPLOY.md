@@ -32,9 +32,8 @@ Create a `.env` file in this folder with strong passwords:
 
 ```dotenv
 # MongoDB (root account for initial setup)
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=change_me_mongo_password
 MONGO_DB=sacred
+MONGO_PORT= 27017
 
 # MinIO (S3 + console)
 MINIO_ROOT_USER=minio_admin
@@ -50,78 +49,6 @@ EXTRACTOR_HOST_PORT=8050
 ---
 
 ## 2) Edit `docker-compose.yml`
-
-The data for MinIO and MongoDB will be saved in the folders specified in `volumes` (outside the Docker container). Update the volume paths to your preferred locations:
-
-```yaml
-services:
-  mongo:
-    image: mongo:6
-    container_name: mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_DB}
-    ports:
-      - "27017:27017"
-    volumes:
-      - /path/to/your/mongo_data:/data/db  # Change this path
-
-  minio:
-    image: quay.io/minio/minio:latest
-    container_name: minio
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # Web console
-    volumes:
-      - /path/to/your/minio_data:/data  # Change this path
-    profiles:
-      - minio
-
-  omniboard:
-    image: vivekratnavel/omniboard:latest
-    container_name: omniboard
-    restart: unless-stopped
-    depends_on:
-      - mongo
-    ports:
-      - "${OMNIBOARD_HOST_PORT}:9000"
-    command: [
-      "--mu",
-      "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/?authSource=admin&authMechanism=SCRAM-SHA-1",
-      "${MONGO_DB}"
-    ]
-
-  extractor:
-    build:
-      context: ../AltarExtractor
-      dockerfile: Dockerfile
-    container_name: altar-extractor
-    restart: unless-stopped
-    depends_on:
-      - mongo
-    ports:
-      - "${EXTRACTOR_HOST_PORT:-8050}:8050"
-    environment:
-      - PORT=8050
-      - SACRED_DB_NAME=${MONGO_DB}
-    profiles:
-      - extractor
-
-volumes:
-  mongo_data:
-  minio_data:
-```
-
----
-
-## 3) Start the Docker containers
 
 ### Basic stack (MongoDB + Omniboard)
 ```bash
@@ -161,7 +88,7 @@ docker ps
 
 ---
 
-## 4) Connecting AltarExtractor to MongoDB
+## 5) Connecting AltarExtractor to MongoDB
 
 When you open AltarExtractor in your browser, you need to configure the MongoDB connection:
 
@@ -179,7 +106,7 @@ When you open AltarExtractor in your browser, you need to configure the MongoDB 
 
 ---
 
-## 5) (Recommended) Create an app-specific MongoDB user
+## 6) (Recommended) Create an app-specific MongoDB user
 
 ```bash
 docker exec -it mongo mongosh -u admin -p your_password --authenticationDatabase admin
@@ -204,7 +131,7 @@ command: [
 ]
 ```
 
-Restart Omniboard:
+Res4art Omniboard:
 ```bash
 docker compose up -d omniboard
 ```
@@ -213,7 +140,7 @@ docker compose up -d omniboard
 
 ---
 
-## 6) Backups (Linux)
+## 7) Backups (Linux)
 
 ### MongoDB backup script
 
@@ -222,7 +149,7 @@ Edit the `mongo_dump.sh` file:
 #!/bin/bash
 
 # Dumps root repository
-BASE_DIR="/home/user/mongodumps/dump"  # Change to your backup location
+BAS5_DIR="/home/user/mongodumps/dump"  # Change to your backup location
 
 # Timestamp (e.g., 2025-07-07)
 DATE_STR=$(date +%Y-%m-%d)
@@ -256,7 +183,7 @@ Add:
 0 2 * * * bash /path/to/mongo_dump.sh >> /path/to/cron.log 2>&1
 ```
 
----
+---6
 
 ## 7) Cleanup
 
