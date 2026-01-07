@@ -1,89 +1,72 @@
 # AltarDocker
 
-Docker Compose stack for running Sacred ML experiment tracking infrastructure locally.
+Docker Compose stack for running Sacred experiment tracking infrastructure locally.
 
 ## What's Included
 
 | Service | Description | Port |
 |---------|-------------|------|
 | **MongoDB** | Stores experiment metadata | 27017 |
-| **MinIO** | S3-compatible object storage (optional) | 9000, 9001 |
-| **AltarExtractor** | Browse and filter experiments (optional) | 8050 |
+| **MinIO** | S3-compatible object storage | 9000, 9001 |
 
-> **Note:** Omniboard is managed separately by [AltarViewer](../AltarViewer), which configures it for each specific database.
+**Default configuration:**
+- MongoDB: `localhost:27017`, database: `sacred`
+- MinIO: S3 API `localhost:9000`, Console `localhost:9001`
+  - Credentials: `minio_admin` / `changeme123`
 
-## Quick Start
+## Installation
 
-1. **Clone the Altar repository in recursive mode:**
-   ```bash
-   git clone --recursive https://github.com/DreamRepo/Altar.git
-   cd Altar/AltarDocker
-   ```
+Choose your guide based on your needs:
 
-2. **Create `.env` file** with your credentials:
-   ```dotenv
-   MONGO_DB=sacred
+- **[QUICKSTART-GUI.md](QUICKSTART-GUI.md)** — Easy install with Docker Desktop (no command line)
+- **[DEPLOY.md](DEPLOY.md)** — Complete deployment guide with customization options
+- **[MANAGE_USERS.md](MANAGE_USERS.md)** — MongoDB and MinIO user management
 
-   MINIO_ROOT_USER=minio_admin
-   MINIO_ROOT_PASSWORD=your_minio_password
+## Access the Services
 
-   EXTRACTOR_HOST_PORT=8050
-   MONGO_PORT=27017 # Careful here if you already have MongoDB installed on your computer, change this port to eg. 27077 !
-   ```
-
-3. **Start the stack:**
-   ```bash
-   # Basic (MongoDB only)
-   docker compose up -d
-
-   # With MinIO
-   docker compose --profile minio up -d
-
-   # With AltarExtractor
-   docker compose --profile extractor up -d
-
-   # Full stack
-   docker compose --profile minio --profile extractor up -d
-   ```
-
-4. **Access the services:**
-   - AltarExtractor: http://localhost:8050
-   - MinIO Console: http://localhost:9001
-   - Omniboard: Use [AltarViewer](../AltarViewer) to launch Omniboard for your database
-
-## Documentation
-
-- [DEPLOY.md](DEPLOY.md) — Full deployment guide with detailed configuration
-- [MANAGE_USERS.md](MANAGE_USERS.md) — MongoDB and MinIO user management
+- **MongoDB**: `mongodb://localhost:27017`
+- **MinIO Console**: http://localhost:9001
+- **Use with:**
+  - [AltarSender](../AltarSender) — Upload experiments
+  - [AltarViewer](../AltarViewer) — View experiments with Omniboard
+  - [AltarExtractor](../AltarExtractor) — Analyze and export data
 
 
 ## For developers: 
 
-### Purpose: add credentials to MongoDB
-Update the .env file: 
+### Adding MongoDB Authentication
 
+By default, MongoDB runs without authentication. To add authentication:
+
+1. **Add to your `.env` file:**
    ```dotenv
    MONGO_ROOT_USER=admin
    MONGO_ROOT_PASSWORD=your_secure_password
    ```
 
-and the "environment" section of docker-compose.yml file:
+2. **Update the mongo service in `docker-compose.yml`** to use these variables:
+   ```yaml
+   mongo:
+     image: mongo:6
+     container_name: mongo_altar
+     restart: unless-stopped
+     environment:
+       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+       MONGO_INITDB_DATABASE: ${MONGO_DB}
+     ports:
+       - "${MONGO_PORT}:27017"
+     volumes:
+       - ${MONGO_DATA_PATH}:/data/db
+   ```
 
- ```docker
-  mongo:
-    image: mongo:6
-    container_name: mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_DB}
-    ports:
-      - "${MONGO_PORT}:27017"
-    volumes:
-      - PATH/TO/DATA/mongo_data:/data/db
+3. **Recreate the container:**
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
 
- ```
+> **Note:** After enabling authentication, you'll need to update connection strings in AltarSender, AltarViewer, and AltarExtractor to include the username and password.
 
 ## Requirements
 
@@ -93,8 +76,9 @@ and the "environment" section of docker-compose.yml file:
 
 ## Related
 
-- [AltarExtractor](https://github.com/DreamRepo/AltarExtractor) — Browse and filter Sacred experiments in a web UI
+- [AltarExtractor](https://github.com/DreamRepo/AltarExtractor) — Browse and filter Sacred experiments (standalone deployment)
 - [AltarSender](https://github.com/DreamRepo/AltarSender) — GUI to send experiments to Sacred and MinIO
+- [AltarViewer](https://github.com/DreamRepo/AltarViewer) — Launch Omniboard configured for your database
 
 ## License
 
