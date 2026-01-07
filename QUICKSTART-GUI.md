@@ -12,20 +12,24 @@
 ### 1. Download the File
 
 Download `docker-compose.yml` from the [AltarDocker repository](https://github.com/DreamRepo/AltarDocker) to a folder on your computer.
+Copy the full path of this folder. 
+
+![image](https://github.com/DreamRepo/AltarDocker/compose_path.png)
+
 
 ### 2. Deploy with Docker Desktop
 
-**Using Docker Desktop GUI:**
+**Using Docker Desktop GUI - if you find the option**
 1. Open Docker Desktop
 2. Click the **"+"** button or **"Import"** in the Containers tab
 3. Select your `docker-compose.yml` file
 4. Click **"Run"**
 
-**Using Terminal (if you prefer):**
+**Using Terminal:**
 ```bash
-cd path/to/your/folder
-docker compose up -d
+docker compose -f path/to/your/folder/docker-compose.yml up -d
 ```
+![video](https://github.com/DreamRepo/AltarDocker/install_altardocker.mp4)
 
 ### 3. Access Your Services
 
