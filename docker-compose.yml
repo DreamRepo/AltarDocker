@@ -21,8 +21,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "${MINIO_S3_PORT:-9000}:9000"      # S3 API
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Web console
+      - "${MINIO_S3_PORT}:9000"      # S3 API
+      - "${MINIO_CONSOLE_PORT}:9001"  # Web console
     volumes:
       - ${MINIO_DATA_PATH}:/data
 
