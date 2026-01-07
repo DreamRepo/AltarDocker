@@ -7,27 +7,33 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
 | Service | Description | Port |
 |---------|-------------|------|
 | **MongoDB** | Stores experiment metadata | 27017 |
-| **Omniboard** | Web dashboard for Sacred experiments | 9030 |
 | **MinIO** | S3-compatible object storage (optional) | 9000, 9001 |
 | **AltarExtractor** | Browse and filter experiments (optional) | 8050 |
 
+> **Note:** Omniboard is managed separately by [AltarViewer](../AltarViewer), which configures it for each specific database.
+
 ## Quick Start
 
-1. **Create `.env` file** with your credentials:
+1. **Clone the Altar repository in recursive mode:**
+   ```bash
+   git clone --recursive https://github.com/DreamRepo/Altar.git
+   cd Altar/AltarDocker
+   ```
+
+2. **Create `.env` file** with your credentials:
    ```dotenv
    MONGO_DB=sacred
 
    MINIO_ROOT_USER=minio_admin
    MINIO_ROOT_PASSWORD=your_minio_password
 
-   OMNIBOARD_HOST_PORT=9030
    EXTRACTOR_HOST_PORT=8050
    MONGO_PORT=27017 # Careful here if you already have MongoDB installed on your computer, change this port to eg. 27077 !
    ```
 
-2. **Start the stack:**
+3. **Start the stack:**
    ```bash
-   # Basic (MongoDB + Omniboard)
+   # Basic (MongoDB only)
    docker compose up -d
 
    # With MinIO
@@ -40,10 +46,10 @@ Docker Compose stack for running Sacred ML experiment tracking infrastructure lo
    docker compose --profile minio --profile extractor up -d
    ```
 
-3. **Access the services:**
-   - Omniboard: http://localhost:9030
+4. **Access the services:**
    - AltarExtractor: http://localhost:8050
    - MinIO Console: http://localhost:9001
+   - Omniboard: Use [AltarViewer](../AltarViewer) to launch Omniboard for your database
 
 ## Documentation
 

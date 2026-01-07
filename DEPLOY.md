@@ -3,8 +3,9 @@
 This guide helps you start a minimal stack locally using Docker Compose:
 - MongoDB for experiment metadata
 - MinIO (S3-compatible) for raw data (optional)
-- Omniboard connected to MongoDB
 - AltarExtractor for browsing Sacred experiments (optional)
+
+> **Note:** Omniboard is managed separately by [AltarViewer](../AltarViewer), which configures it for each specific database.
 
 ---
 
@@ -39,18 +40,15 @@ MONGO_PORT= 27017
 MINIO_ROOT_USER=minio_admin
 MINIO_ROOT_PASSWORD=change_me_minio_password
 
-# Host port for Omniboard (internal port is 9000)
-OMNIBOARD_HOST_PORT=9004
-
 # Host port for AltarExtractor (internal port is 8050)
 EXTRACTOR_HOST_PORT=8050
 ```
 
 ---
 
-## 2) Edit `docker-compose.yml`
+## 2) Start the services
 
-### Basic stack (MongoDB + Omniboard)
+### Basic stack (MongoDB only)
 ```bash
 docker compose up -d
 docker ps
@@ -83,8 +81,8 @@ docker ps
 | MongoDB        | `mongodb://localhost:27017` (authenticate with root)     |
 | MinIO S3 API   | http://localhost:9000                                    |
 | MinIO Console  | http://localhost:9001                                    |
-| Omniboard      | http://localhost:9004 (or your `OMNIBOARD_HOST_PORT`)    |
 | AltarExtractor | http://localhost:8050 (or your `EXTRACTOR_HOST_PORT`)    |
+| Omniboard      | Use [AltarViewer](../AltarViewer) to launch Omniboard    |
 
 ---
 
