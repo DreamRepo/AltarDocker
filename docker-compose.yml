@@ -4,11 +4,13 @@ services:
     container_name: mongo_altar
     restart: unless-stopped
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB:-sacred}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - "${MONGO_PORT}:27017"
     volumes:
-      - ${MONGO_DATA_PATH:-./data/mongo}:/data/db
+      - ${MONGO_DATA_PATH}:/data/db
 
   minio:
     image: quay.io/minio/minio:latest
@@ -16,10 +18,11 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio_admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme123}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "${MINIO_S3_PORT:-9000}:9000"      # S3 API
       - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Web console
     volumes:
-      - ${MINIO_DATA_PATH:-./data/minio}:/data
+      - ${MINIO_DATA_PATH}:/data
+

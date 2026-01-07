@@ -12,14 +12,16 @@ Docker Compose stack for running Sacred experiment tracking infrastructure local
 **Default configuration:**
 - MongoDB: `localhost:27017`, database: `sacred`
 - MinIO: S3 API `localhost:9000`, Console `localhost:9001`
-  - Credentials: `minio_admin` / `changeme123`
+  - MongoDB Credentials: no credentials
+  - MinIO Credentials: `minio_admin` / `changeme123`
+
 
 ## Installation
 
 Choose your guide based on your needs:
 
 - **[QUICKSTART-GUI.md](QUICKSTART-GUI.md)** — Easy install with Docker Desktop (no command line)
-- **[DEPLOY.md](DEPLOY.md)** — Complete deployment guide with customization options
+- **[DEPLOY.md](DEPLOY.md)** — Complete deployment guide with customization options - for deployment on Virtual Machines
 - **[MANAGE_USERS.md](MANAGE_USERS.md)** — MongoDB and MinIO user management
 
 ## Access the Services
@@ -31,42 +33,6 @@ Choose your guide based on your needs:
   - [AltarViewer](../AltarViewer) — View experiments with Omniboard
   - [AltarExtractor](../AltarExtractor) — Analyze and export data
 
-
-## For developers: 
-
-### Adding MongoDB Authentication
-
-By default, MongoDB runs without authentication. To add authentication:
-
-1. **Add to your `.env` file:**
-   ```dotenv
-   MONGO_ROOT_USER=admin
-   MONGO_ROOT_PASSWORD=your_secure_password
-   ```
-
-2. **Update the mongo service in `docker-compose.yml`** to use these variables:
-   ```yaml
-   mongo:
-     image: mongo:6
-     container_name: mongo_altar
-     restart: unless-stopped
-     environment:
-       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-       MONGO_INITDB_DATABASE: ${MONGO_DB}
-     ports:
-       - "${MONGO_PORT}:27017"
-     volumes:
-       - ${MONGO_DATA_PATH}:/data/db
-   ```
-
-3. **Recreate the container:**
-   ```bash
-   docker compose down
-   docker compose up -d
-   ```
-
-> **Note:** After enabling authentication, you'll need to update connection strings in AltarSender, AltarViewer, and AltarExtractor to include the username and password.
 
 ## Requirements
 

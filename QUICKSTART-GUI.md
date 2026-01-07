@@ -11,7 +11,7 @@
 
 ### 1. Download the File
 
-Download `docker-compose.yml` from the [AltarDocker repository](https://github.com/DreamRepo/AltarDocker) to a folder on your computer.
+Download `docker-compose_default.yml` from the [AltarDocker repository](https://github.com/DreamRepo/AltarDocker) to a folder on your computer.
 Copy the full path of this folder. 
 
 ![image](https://github.com/DreamRepo/AltarDocker/compose_path.png)
@@ -22,12 +22,12 @@ Copy the full path of this folder.
 **Using Docker Desktop GUI - if you find the option**
 1. Open Docker Desktop
 2. Click the **"+"** button or **"Import"** in the Containers tab
-3. Select your `docker-compose.yml` file
+3. Select your `docker-compose_default.yml` file
 4. Click **"Run"**
 
 **Using Terminal:**
 ```bash
-docker compose -f path/to/your/folder/docker-compose.yml up -d
+docker compose -f path/to/your/folder/docker-compose_default.yml up -d
 ```
 ![video](https://github.com/DreamRepo/AltarDocker/install_altardocker.mp4)
 
@@ -42,7 +42,7 @@ That's it! Your services are running with sensible defaults.
 ## Want to Customize?
 
 **Simple method** - Edit the compose file directly:
-- Open `docker-compose.yml` in Notepad/VS Code
+- Open `docker-compose_default.yml` in Notepad/VS Code
 - Find lines with `:-` (e.g., `:-changeme123`)
 - Change the value after `:-` to customize
 
