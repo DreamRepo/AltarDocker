@@ -1,12 +1,22 @@
 # AltarDocker — Deployment Guide
 
-Complete guide for deploying MongoDB and MinIO infrastructure for Sacred experiment tracking.
+Complete guide for deploying the Altar infrastructure stack for Sacred experiment tracking.
 
 **Services included:**
 - MongoDB for experiment metadata
-- MinIO for S3-compatible object storage
+- AltarExtractor for browsing and filtering Sacred experiments
+- MinIO for S3-compatible object storage *(optional)*
 
-> **Note:** Omniboard is managed by [AltarViewer](../AltarViewer), AltarExtractor is [deployed separately](../AltarExtractor).
+> **Note:** Omniboard is managed by [AltarViewer](../AltarViewer).
+
+### About MinIO
+
+MinIO is **optional** and **not recommended for local-only deployments**. When running everything locally, storing raw data directly on disk is simpler and faster.
+
+**When to enable MinIO:**
+- You plan to host raw data on a **shared server** accessible by multiple machines
+- You are deploying the solution on a **remote server** where S3-compatible storage is needed
+- You want to prepare for a future migration to cloud or shared infrastructure
 
 ---
 
@@ -20,8 +30,8 @@ Complete guide for deploying MongoDB and MinIO infrastructure for Sacred experim
 
 **The compose file works without a `.env` file!** It has built-in defaults:
 - MongoDB: `sacred` database on port `27017`
-- MinIO: `minio_admin` / `changeme123` on ports `9000` and `9001`
-- Data stored in `./data/mongo/` and `./data/minio/`
+- AltarExtractor: port `8050`
+- MinIO *(if enabled)*: `minio_admin` / `changeme123` on ports `9000` and `9001`
 
 **To customize**, copy `.env.example` to `.env` and modify the values:
 
@@ -37,14 +47,19 @@ The `.env.example` file contains:
 MONGO_DB=sacred
 MONGO_PORT=27017
 
-# MinIO Configuration
+# AltarExtractor Configuration
+EXTRACTOR_PORT=8050
+
+# Volume Paths
+MONGO_DATA_PATH=./data/mongo/
+
+# ---------------------------------------------------------
+# MinIO Configuration (only needed with --profile minio)
+# ---------------------------------------------------------
 MINIO_ROOT_USER=minio_admin
 MINIO_ROOT_PASSWORD=your_secure_password
 MINIO_S3_PORT=9000
 MINIO_CONSOLE_PORT=9001
-
-# Volume Paths (where data is stored)
-MONGO_DATA_PATH=./data/mongo/
 MINIO_DATA_PATH=./data/minio/
 ```
 
@@ -52,75 +67,65 @@ MINIO_DATA_PATH=./data/minio/
 
 ## 2) Start the Services
 
+### Default (without MinIO — recommended for local use)
+
 ```bash
 docker compose up -d
 docker ps
 ```
 
-> **Note:** On Linux, you may need to prefix commands with `sudo`.
-
-**All services start automatically:**
+This starts:
 - MongoDB on port 27017
+- AltarExtractor on port 8050
+
+### With MinIO (for shared/server deployments)
+
+```bash
+docker compose --profile minio up -d
+docker ps
+```
+
+This additionally starts:
 - MinIO S3 API on port 9000
 - MinIO Console on port 9001
 
+> **Note:** On Linux, you may need to prefix commands with `sudo`.
+
 ### Access URLs
 
-| Service        | URL                                                      |
-|----------------|----------------------------------------------------------|
-| MongoDB        | `mongodb://localhost:27017`                              |
-| MinIO S3 API   | http://localhost:9000                                    |
-| MinIO Console  | http://localhost:9001                                    |
+| Service         | URL                            | Profile    |
+|-----------------|--------------------------------|------------|
+| MongoDB         | `mongodb://localhost:27017`    | default    |
+| AltarExtractor  | http://localhost:8050          | default    |
+| MinIO S3 API    | http://localhost:9000          | `minio`    |
+| MinIO Console   | http://localhost:9001          | `minio`    |
 
 ---
 
+## 3) Connect AltarExtractor to MongoDB
 
-## Backups (Linux)
+When AltarExtractor runs inside the Docker stack, use these connection settings in the web UI:
 
-### MongoDB backup script
+| Field         | Value                        |
+|---------------|------------------------------|
+| Host          | `mongo`                      |
+| Port          | `27017`                      |
+| Database      | `sacred` (or your `MONGO_DB`)|
+| Username      | (leave empty if no auth)     |
+| Password      | (leave empty if no auth)     |
+| Auth source   | `admin`                      |
 
-Edit the `mongo_dump.sh` file:
-```bash
-#!/bin/bash
+> **Tip:** The Docker service name `mongo` is used as the host because both containers share the same Docker network.
 
-# Dumps root repository
-BAS5_DIR="/home/user/mongodumps/dump"  # Change to your backup location
+---
 
-# Timestamp (e.g., 2025-07-07)
-DATE_STR=$(date +%Y-%m-%d)
+## Backups
 
-# Destination folder
-OUT_DIR="$BASE_DIR/$DATE_STR"
+See [BACKUP.md](./BACKUP.md) for complete backup and restore instructions for MongoDB and MinIO.
 
-# Execute the dump
-/usr/bin/mongodump --host 0.0.0.0 --port 27017 \
-  --username "$MONGO_ROOT_USER" \
-  --password "$MONGO_ROOT_PASSWORD" \
-  --authenticationDatabase admin \
-  --out="$OUT_DIR"
+---
 
-# Keep only the last 3 dumps
-cd "$BASE_DIR"
-ls -dt */ | tail -n +4 | xargs -d '\n' rm -rf
-```
-
-Make it executable:
-```bash
-chmod +x mongo_dump.sh
-```
-
-Schedule with crontab (runs daily at 2am):
-```bash
-crontab -e
-```
-Add:
-```
-0 2 * * * bash /path/to/mongo_dump.sh >> /path/to/cron.log 2>&1
-```
-
----6
-
-## 7) Cleanup
+## 4) Cleanup
 
 ```bash
 docker compose down
@@ -133,13 +138,16 @@ docker compose down
 ## Troubleshooting
 
 - **Omniboard cannot connect?** Use [AltarViewer](../AltarViewer) to launch Omniboard properly configured for your database.
-- **Port conflict?** Change `MONGO_PORT` or MinIO port mappings in `docker-compose.yml`.
-- **S3 SDKs:** Use endpoint `http://localhost:9000` with MinIO credentials.
+- **AltarExtractor cannot connect to MongoDB?** Make sure to use `mongo` as the host (Docker service name), not `localhost`.
+- **Port conflict?** Change `MONGO_PORT`, `EXTRACTOR_PORT`, or MinIO port mappings in `.env` or `docker-compose.yml`.
+- **MinIO not starting?** Make sure you used `docker compose --profile minio up -d` (MinIO is optional and requires the profile).
+- **S3 SDKs:** Use endpoint `http://localhost:9000` with MinIO credentials (requires `--profile minio`).
 
 ---
 
 ## Related
 
-- [AltarExtractor](https://github.com/DreamRepo/AltarExtractor) — Browse and filter Sacred experiments (standalone deployment)
+- [BACKUP.md](./BACKUP.md) — Backup and restore guide for MongoDB and MinIO
+- [AltarExtractor](../AltarExtractor) — Browse and filter Sacred experiments (included in this stack)
 - [AltarSender](https://github.com/DreamRepo/AltarSender) — GUI to send experiments to Sacred and MinIO
-- [AltarViewer](https://github.com/DreamRepo/AltarViewer) — Launch Omniboard configured for your database
+- [AltarViewer](../AltarViewer) — Launch Omniboard configured for your database

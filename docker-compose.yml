@@ -14,6 +14,8 @@ services:
     image: quay.io/minio/minio:latest
     container_name: minio_altar
     restart: unless-stopped
+    profiles:
+      - minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio_admin}
@@ -23,3 +25,10 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Web console
     volumes:
       - ${MINIO_DATA_PATH:-./data/minio}:/data
+
+  altar-extractor:
+    image: wgaulti/altar-extractor
+    container_name: altar_extractor
+    restart: unless-stopped
+    ports:
+      - "${EXTRACTOR_PORT:-8050}:8050"
