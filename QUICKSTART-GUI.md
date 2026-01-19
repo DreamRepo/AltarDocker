@@ -43,14 +43,15 @@ docker compose --profile minio up -d
 
 ### 3. Access Your Services
 
-| Service | URL | Credentials |
+| Service | URL | Description |
 |---------|-----|-------------|
-| **Omniboard 1** | http://localhost:9004 | — |
-| **Omniboard 2** | http://localhost:9003 | — |
-| **AltarExtractor** | http://localhost:8050 | — |
-| **MongoDB** | `mongodb://localhost:27018` | `admin` / `change_me` |
+| **Omniboard** | http://localhost:9004 | Visualize and compare Sacred experiments |
+| **AltarExtractor** | http://localhost:8050 | Browse and filter experiment data |
+| **MongoDB** | `mongodb://localhost:27017` | Database (credentials: `admin` / `changeme123`) |
 
 That's it! Your services are running with sensible defaults.
+
+> **Tip:** Omniboard is already configured to connect to MongoDB. Just open http://localhost:9004 and start exploring your experiments!
 
 If you deployed with `--profile minio`, you also have:
 
@@ -75,7 +76,7 @@ If you deployed with `--profile minio`, you also have:
 ## Managing Services
 
 In Docker Desktop:
-- **View status**: Go to "Containers" tab → see `mongo_altar`, `omniboard1`, `omniboard2`, `altar_extractor`
+- **View status**: Go to "Containers" tab → see `mongo_altar`, `omniboard`, `altar_extractor`
 - **Stop**: Click the Stop button
 - **Restart**: Click the Start button
 - **View logs**: Click the container name
@@ -91,6 +92,7 @@ In Docker Desktop:
 
 ## Next Steps
 
+- Open http://localhost:9004 to visualize experiments with **Omniboard**
+- Open http://localhost:8050 to analyze experiments with **AltarExtractor**
 - Download [AltarSender](https://github.com/DreamRepo/AltarSender/releases) to upload experiments
-- Open http://localhost:9004 to visualize experiments with Omniboard
-- Open http://localhost:8050 to analyze experiments with AltarExtractor
+- See [MANAGE_USERS.md](MANAGE_USERS.md) to create additional MongoDB users

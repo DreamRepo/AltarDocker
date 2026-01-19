@@ -6,6 +6,42 @@ This guide covers creating users and managing access for MongoDB and MinIO in yo
 
 ## 1. MongoDB
 
+### Connecting to the MongoDB shell (mongosh)
+
+To manage users, you need to connect to the MongoDB shell inside the container.
+
+#### Connect as admin (recommended)
+
+```bash
+docker exec -it mongo_altar mongosh -u admin -p changeme123 --authenticationDatabase admin
+```
+
+> **Note:** Replace `admin` and `changeme123` with your actual credentials if you've customized `MONGO_ROOT_USER` and `MONGO_ROOT_PASSWORD` in your `.env` file.
+
+#### Connect as a specific user
+
+```bash
+# User created in admin database
+docker exec -it mongo_altar mongosh -u username -p password123 --authenticationDatabase admin
+
+# User created in a specific database (e.g., sacred)
+docker exec -it mongo_altar mongosh -u username -p password123 --authenticationDatabase sacred
+```
+
+#### Connect from outside Docker (host machine)
+
+If you have `mongosh` installed locally:
+
+```bash
+# As admin
+mongosh "mongodb://admin:changeme123@localhost:27017/admin"
+
+# To a specific database
+mongosh "mongodb://admin:changeme123@localhost:27017/sacred?authSource=admin"
+```
+
+---
+
 ### Understanding authentication databases
 
 When creating a MongoDB user, you choose **where** to create them: in the `admin` database or in a specific database (e.g., `sacred`). This choice affects how users authenticate.

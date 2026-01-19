@@ -4,10 +4,9 @@ Complete guide for deploying the Altar infrastructure stack for Sacred experimen
 
 **Services included:**
 - MongoDB for experiment metadata
+- Omniboard for visualizing and comparing Sacred experiments
 - AltarExtractor for browsing and filtering Sacred experiments
 - MinIO for S3-compatible object storage *(optional)*
-
-> **Note:** Omniboard is managed by [AltarViewer](../AltarViewer).
 
 ### About MinIO
 
@@ -44,8 +43,14 @@ The `.env.example` file contains:
 
 ```dotenv
 # MongoDB Configuration
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=changeme123
 MONGO_DB=sacred
 MONGO_PORT=27017
+
+# Omniboard Configuration
+OMNIBOARD_HOST_PORT=9004
+OMNIBOARD_DB=sacred
 
 # AltarExtractor Configuration
 EXTRACTOR_PORT=8050
@@ -76,6 +81,7 @@ docker ps
 
 This starts:
 - MongoDB on port 27017
+- Omniboard on port 9004
 - AltarExtractor on port 8050
 
 ### With MinIO (for shared/server deployments)
@@ -96,6 +102,7 @@ This additionally starts:
 | Service         | URL                            | Profile    |
 |-----------------|--------------------------------|------------|
 | MongoDB         | `mongodb://localhost:27017`    | default    |
+| Omniboard       | http://localhost:9004          | default    |
 | AltarExtractor  | http://localhost:8050          | default    |
 | MinIO S3 API    | http://localhost:9000          | `minio`    |
 | MinIO Console   | http://localhost:9001          | `minio`    |
@@ -137,9 +144,10 @@ docker compose down
 
 ## Troubleshooting
 
-- **Omniboard cannot connect?** Use [AltarViewer](../AltarViewer) to launch Omniboard properly configured for your database.
+- **Omniboard shows "No experiments found"?** Check that you're connected to the correct database. The default is `sacred` — if your experiments are in a different database, update the `OMNIBOARD_DB` variable in your `.env` file.
+- **Omniboard cannot connect to MongoDB?** Verify the MongoDB credentials match between the `mongo` and `omniboard` services. Check the container logs with `docker logs omniboard`.
 - **AltarExtractor cannot connect to MongoDB?** Make sure to use `mongo` as the host (Docker service name), not `localhost`.
-- **Port conflict?** Change `MONGO_PORT`, `EXTRACTOR_PORT`, or MinIO port mappings in `.env` or `docker-compose.yml`.
+- **Port conflict?** Change `MONGO_PORT`, `EXTRACTOR_PORT`, `OMNIBOARD_HOST_PORT`, or MinIO port mappings in `.env` or `docker-compose.yml`.
 - **MinIO not starting?** Make sure you used `docker compose --profile minio up -d` (MinIO is optional and requires the profile).
 - **S3 SDKs:** Use endpoint `http://localhost:9000` with MinIO credentials (requires `--profile minio`).
 
@@ -148,6 +156,7 @@ docker compose down
 ## Related
 
 - [BACKUP.md](./BACKUP.md) — Backup and restore guide for MongoDB and MinIO
+- [MANAGE_USERS.md](./MANAGE_USERS.md) — Create and manage MongoDB and MinIO users
 - [AltarExtractor](../AltarExtractor) — Browse and filter Sacred experiments (included in this stack)
 - [AltarSender](https://github.com/DreamRepo/AltarSender) — GUI to send experiments to Sacred and MinIO
-- [AltarViewer](../AltarViewer) — Launch Omniboard configured for your database
+- [Omniboard](https://github.com/vivekratnavel/omniboard) — Web dashboard for Sacred experiments (included in this stack)
