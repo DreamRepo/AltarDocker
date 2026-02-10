@@ -89,7 +89,7 @@ docker exec mongo_altar mongorestore --db sacred /data/db/backup/sacred
 #### From host (if mongorestore is installed locally)
 
 ```bash
-mongorestore --host localhost --port 27017 --db sacred ./mongo_backup/sacred
+mongorestore --host localhost --port 27017 --db [database_name] [/path/to/backup]
 ```
 
 #### With authentication
